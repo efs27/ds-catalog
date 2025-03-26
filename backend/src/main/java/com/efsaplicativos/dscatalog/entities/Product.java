@@ -1,5 +1,6 @@
 package com.efsaplicativos.dscatalog.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -42,6 +43,7 @@ public class Product {
         this.name = name;
     }
 
+    @JsonIgnore
     public Set<Category> getCategories() {
         return categories;
     }

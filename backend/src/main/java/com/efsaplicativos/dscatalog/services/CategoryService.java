@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,32 +24,33 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public CategoryDto findById(Long id) {
-        Category category = repository.findById(id)
+        Category entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
-        return new CategoryDto(category);
+        return new CategoryDto(entity);
     }
 
     @Transactional(readOnly = true)
     public Page<CategoryDto> findAll(Pageable pageable) {
-        Page<Category> categories = repository.findAll(pageable);
-        return categories.map(CategoryDto::new);
+        Page<Category> entities = repository.findAll(pageable);
+        return entities.map(CategoryDto::new);
     }
 
     @Transactional
     public CategoryDto save(CategoryDto dto) {
-        Category category = new Category();
-        BeanUtils.copyProperties(dto, category);
-        category = repository.save(category);
-        return new CategoryDto(category);
+        Category entity = new Category();
+        BeanUtils.copyProperties(dto, entity);
+        entity = repository.save(entity);
+        return new CategoryDto(entity);
     }
 
     @Transactional
     public CategoryDto update(Long id, CategoryDto dto) {
         try {
-            Category category = repository.getReferenceById(id);
-            BeanUtils.copyProperties(dto, category);
-            category = repository.save(category);
-            return new CategoryDto(category);
+            Category entity = repository.getReferenceById(id);
+            BeanUtils.copyProperties(dto, entity);
+            entity.setId(id);
+            entity = repository.save(entity);
+            return new CategoryDto(entity);
         } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Categoria não encontrada");
         }

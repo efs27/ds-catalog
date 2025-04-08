@@ -2,7 +2,9 @@ package com.efsaplicativos.dscatalog.dtos;
 
 import com.efsaplicativos.dscatalog.entities.Category;
 import com.efsaplicativos.dscatalog.entities.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,23 +13,24 @@ public class CategoryDto {
 
     private Long id;
     private String name;
-
-    private List<ProductDto> products = new ArrayList<>();
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public CategoryDto() {
     }
 
-    public CategoryDto(Long id, String name) {
+    public CategoryDto(Long id, String name, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public CategoryDto(Category category) {
         id = category.getId();
         name = category.getName();
-        for (Product cat : category.getProducts()) {
-            products.add(new ProductDto(cat));
-        }
+        createdAt = category.getCreatedAt();
+        updatedAt = category.getUpdatedAt();
     }
 
     public Long getId() {
@@ -46,12 +49,20 @@ public class CategoryDto {
         this.name = name;
     }
 
-    public List<ProductDto> getProducts() {
-        return products;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setProducts(List<ProductDto> products) {
-        this.products = products;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override

@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,32 +24,33 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDto findById(Long id) {
-        Product product = repository.findById(id)
+        Product entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
-        return new ProductDto(product);
+        return new ProductDto(entity);
     }
 
     @Transactional(readOnly = true)
     public Page<ProductDto> findAll(Pageable pageable) {
-        Page<Product> products = repository.findAll(pageable);
-        return products.map(ProductDto::new);
+        Page<Product> entities = repository.findAll(pageable);
+        return entities.map(ProductDto::new);
     }
 
     @Transactional
     public ProductDto save(ProductDto dto) {
-        Product product = new Product();
-        BeanUtils.copyProperties(dto, product);
-        product = repository.save(product);
-        return new ProductDto(product);
+        Product entity = new Product();
+        BeanUtils.copyProperties(dto, entity);
+        entity = repository.save(entity);
+        return new ProductDto(entity);
     }
 
     @Transactional
     public ProductDto update(Long id, ProductDto dto) {
         try {
-            Product product = repository.getReferenceById(id);
-            BeanUtils.copyProperties(dto, product);
-            product = repository.save(product);
-            return new ProductDto(product);
+            Product entity = repository.getReferenceById(id);
+            BeanUtils.copyProperties(dto, entity);
+            entity.setId(id);
+            entity = repository.save(entity);
+            return new ProductDto(entity);
         } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Produto não encontrado");
         }

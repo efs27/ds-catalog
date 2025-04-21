@@ -36,7 +36,13 @@ public class UserController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
+    @GetMapping(value = "/me")
+    public ResponseEntity<UserDto> findMe() {
+        UserDto dto = service.findMe();
+        return ResponseEntity.ok(dto);
+    }
+
     @PostMapping
     public ResponseEntity<UserDto> save(@RequestBody @Valid UserInsertDto dto) {
         UserDto newDto = service.save(dto);

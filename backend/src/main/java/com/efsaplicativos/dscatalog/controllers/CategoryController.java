@@ -4,14 +4,13 @@ import com.efsaplicativos.dscatalog.dtos.CategoryDto;
 import com.efsaplicativos.dscatalog.services.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/categories")
@@ -27,9 +26,10 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CategoryDto>> findAll(Pageable pageable) {
-        Page<CategoryDto> dtos = service.findAll(pageable);
+    public ResponseEntity<List<CategoryDto>> findAll() {
+        List<CategoryDto> dtos = service.findAll();
         return ResponseEntity.ok(dtos);
+
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")

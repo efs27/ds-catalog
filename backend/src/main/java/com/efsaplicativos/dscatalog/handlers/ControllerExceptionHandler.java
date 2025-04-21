@@ -3,6 +3,7 @@ package com.efsaplicativos.dscatalog.handlers;
 import com.efsaplicativos.dscatalog.errors.CustomError;
 import com.efsaplicativos.dscatalog.errors.ValidationError;
 import com.efsaplicativos.dscatalog.exceptions.DatabaseException;
+import com.efsaplicativos.dscatalog.exceptions.EmailException;
 import com.efsaplicativos.dscatalog.exceptions.ForbiddenException;
 import com.efsaplicativos.dscatalog.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,13 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<CustomError> resourceNotFound(ResourceNotFoundException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<CustomError> email(EmailException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);
     }

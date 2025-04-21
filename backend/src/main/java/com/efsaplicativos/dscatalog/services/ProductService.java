@@ -4,17 +4,22 @@ import com.efsaplicativos.dscatalog.dtos.ProductDto;
 import com.efsaplicativos.dscatalog.entities.Product;
 import com.efsaplicativos.dscatalog.exceptions.DatabaseException;
 import com.efsaplicativos.dscatalog.exceptions.ResourceNotFoundException;
+import com.efsaplicativos.dscatalog.projections.ProductProjection;
 import com.efsaplicativos.dscatalog.repositories.ProductRepository;
+import com.efsaplicativos.dscatalog.utils.Util;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -29,10 +34,21 @@ public class ProductService {
         return new ProductDto(entity);
     }
 
+    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
-    public Page<ProductDto> findAll(Pageable pageable) {
-        Page<Product> entities = repository.findAll(pageable);
-        return entities.map(ProductDto::new);
+    public Page<ProductDto> findAll(String name, String categoryId, Pageable pageable) {
+        List<Long> categoryIds = List.of();
+        if (!"0".equals(categoryId)) {
+            categoryIds = Arrays.stream(categoryId.split(",")).map(Long::parseLong).toList();
+        }
+        Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
+        List<Long> productIds = page.map(ProductProjection::getId).toList();
+
+        List<Product> entities = repository.searchProductsWithCategories(productIds);
+        entities = (List<Product>) Util.replace(page.getContent(), entities);
+
+        List<ProductDto> dtos = entities.stream().map(ProductDto::new).toList();
+        return new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
     }
 
     @Transactional
@@ -57,8 +73,8 @@ public class ProductService {
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void deleteById(Long id){
-        if (!repository.existsById(id)){
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Produto não encontrado");
         }
         try {

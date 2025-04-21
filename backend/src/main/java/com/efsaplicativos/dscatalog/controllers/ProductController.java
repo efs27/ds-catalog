@@ -1,6 +1,7 @@
 package com.efsaplicativos.dscatalog.controllers;
 
 import com.efsaplicativos.dscatalog.dtos.ProductDto;
+import com.efsaplicativos.dscatalog.projections.ProductProjection;
 import com.efsaplicativos.dscatalog.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductDto>> findAll(Pageable pageable) {
-        Page<ProductDto> dtos = service.findAll(pageable);
+    public ResponseEntity<Page<ProductDto>> findAll(
+            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "categoryId", defaultValue = "0") String categoryId,
+            Pageable pageable) {
+        Page<ProductDto> dtos = service.findAll(name, categoryId, pageable);
         return ResponseEntity.ok(dtos);
     }
 

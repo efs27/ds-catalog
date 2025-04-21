@@ -76,7 +76,6 @@ public class Category {
         updatedAt = Instant.now();
     }
 
-    @JsonIgnore
     public Set<Product> getProducts() {
         return products;
     }

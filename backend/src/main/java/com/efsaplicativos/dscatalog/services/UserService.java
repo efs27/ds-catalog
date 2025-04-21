@@ -38,6 +38,15 @@ public class UserService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private AuthService authService;
+
+    @Transactional(readOnly = true)
+    public UserDto findMe() {
+        User entity = authService.authenticated();
+        return new UserDto(entity);
+    }
+
     @Transactional(readOnly = true)
     public UserDto findById(Long id) {
         User entity = repository.findById(id)
@@ -47,7 +56,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public Page<UserDto> findAll(Pageable pageable) {
-        Page<User> entities = repository.findAll(pageable);
+        Page<User> entities = repository.searchAll(pageable);
         return entities.map(UserDto::new);
     }
 
@@ -55,11 +64,10 @@ public class UserService implements UserDetailsService {
     public UserDto save(UserInsertDto dto) {
         User entity = new User();
         BeanUtils.copyProperties(dto, entity);
+        entity.getRoles().clear();
+        Role roleOperator = roleRepository.findByAuthority("ROLE_OPERATOR");
+        entity.getRoles().add(roleOperator);
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
-        for (RoleDto role : dto.getRoles()) {
-            Role role1 = roleRepository.getReferenceById(role.getId());
-            entity.getRoles().add(role1);
-        }
         entity = repository.save(entity);
         return new UserDto(entity);
     }
